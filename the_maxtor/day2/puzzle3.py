@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 
 valid = 0
 with open("input_day2.txt") as inputFile:

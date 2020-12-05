@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 
 inputArray = []
 with open("input_day1.txt") as inputFile:
