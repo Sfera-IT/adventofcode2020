@@ -1,3 +1,5 @@
+import re
+
 class Passport:
   _req_fields = [
     'byr',
@@ -29,18 +31,16 @@ class Passport:
 
 f = open("input/4.txt", "r")
 
+data = re.sub(r'[\n\r]{2,}', '|', f.read().strip())
+
 tot = valid = 0
 raw = ""
-for line in f:
-  if len(line.strip()):
-    raw = raw + " " + line.strip()
-  else:
-    tot += 1
-    p = Passport(raw.strip())
-    raw = ""
+for line in data.split('|'):
+  tot += 1
+  p = Passport(re.sub(r'[\r\n]+', ' ', line))
 
-    if p.isValid():
-      valid += 1
+  if p.isValid():
+    valid += 1
 
 
 print(f"Valid: {valid} / {tot}")
