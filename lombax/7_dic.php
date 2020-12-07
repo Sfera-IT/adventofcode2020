@@ -1,151 +1,98 @@
 <?php
 
+// refactory secondo metodo di Sharpedge
+
+$regex1 = "/(.*) contain (.*)/";
+$regex2 = "/\d (.*?)s?(?:,|$)/";
+
 $data = file_get_contents('./7_dic.txt');
+$rows = explode("\n", $data);
+
+$items = [];
+foreach ($rows as $row) {
+    preg_match_all($regex1, $row, $matches);
+    preg_match_all($regex2, implode("\n", $matches[2]), $matches2);
+    $items[$matches[1][0]] = $matches2[1];
+}
+
+$stack = ['shiny gold bag'];
+$res = [];
+$i = 0;
+while (count($stack) > 0) {
+    foreach ($items as $bag => $contains) {
+        foreach ($contains as $singleContains) {
+            if (strpos($singleContains, $stack[0]) !== false) {
+                $stack[] = substr($bag, 0, -1); //remove last s
+                $res[] = $bag;
+            }
+        }
+
+    }
+
+    $i++;
+
+    array_shift($stack);
+}
+
+$final = array_unique($res);
+
+echo count($final);
+
+// ---- EX 2
+
+$regex = "/(.*) bags contain (?:([0-9]* \w* \w*) (?:bag[s]?[\.]?[,]?[ ]?)*)(?:([0-9]* \w* \w*) (?:bag[s]?[\.]?[,]?[ ]?)*)?(?:([0-9]* \w* \w*) (?:bag[s]?[\.]?[,]?[ ]?)*)?(?:([0-9]* \w* \w*) (?:bag[s]?[\.]?[,]?[ ]?)*)?(?:([0-9]* \w* \w*) (?:bag[s]?[\.]?[,]?[ ]?)*)?(?:([0-9]* \w* \w*) (?:bag[s]?[\.]?[,]?[ ]?)*)?(?:([0-9]* \w* \w*) (?:bag[s]?[\.]?[,]?[ ]?)*)?(?:([0-9]* \w* \w*) (?:bag[s]?[\.]?[,]?[ ]?)*)?/";
 
 $rows = explode("\n", $data);
 
-/**
- *
- *  FA SCHIFO NON GUARDARE QUESTO ESERCIZIO, LO DEVO RIFARE
- *  FA SCHIFO NON GUARDARE QUESTO ESERCIZIO, LO DEVO RIFARE
- *  FA SCHIFO NON GUARDARE QUESTO ESERCIZIO, LO DEVO RIFARE
- *  FA SCHIFO NON GUARDARE QUESTO ESERCIZIO, LO DEVO RIFARE
- *  FA SCHIFO NON GUARDARE QUESTO ESERCIZIO, LO DEVO RIFARE
- *  FA SCHIFO NON GUARDARE QUESTO ESERCIZIO, LO DEVO RIFARE
- *  FA SCHIFO NON GUARDARE QUESTO ESERCIZIO, LO DEVO RIFARE
- *
- *
- *
- *
- *
- */
-
-
-// prima trovo i colori che possono contenere una shiny gold
-$possible_colors = [];
+$splitted = [];
+$bags = [];
 foreach ($rows as $row) {
-    // shiny gold deve essere presente nella stringa ma non in posizione zero
-    if (strpos($row, "shiny gold") !== false && strpos($row, "shiny gold") !== 0) {
-        // è presente, per trovare il colore che la contiene prendo le prime 2 parole e la aggiungo all'array
-        $r_exploded = explode(" ", $row);
-        $colors = $r_exploded[0]." ".$r_exploded[1];
-        $possible_colors[] = $colors;
-    }
-}
+    $res = [];
+    $split = preg_match_all($regex, $row, $res);
+    $splitted[] = $split;
 
-$possible_colors_2 = [];
-foreach ($possible_colors as $possibleColor) {
-    foreach ($rows as $row) {
-        if (strpos($row, $possibleColor) !== false && strpos($row, $possibleColor) !== 0) {
-            $r_exploded = explode(" ", $row);
-            $colors = $r_exploded[0]." ".$r_exploded[1];
-            $possible_colors_2[] = $colors;
+    $color = $res[1][0];
+    $contains = [];
+
+    $stop = false;
+    $i = 2;
+    while ($stop == false) {
+        $v = $res[$i][0];
+        if ($v != "") {
+            $vsplit = explode(" ", $v);
+            $vnumber = $vsplit[0];
+            $vcolor = $vsplit[1]." ".$vsplit[2];
+            $contains[] = [$vnumber, $vcolor];
+            $i++;
+        } else {
+            $stop = true;
         }
     }
+
+    $bags[$color] = $contains;
 }
 
-$possible_colors_3 = [];
-foreach ($possible_colors_2 as $possibleColor) {
-    foreach ($rows as $row) {
-        if (strpos($row, $possibleColor) !== false && strpos($row, $possibleColor) !== 0) {
-            $r_exploded = explode(" ", $row);
-            $colors = $r_exploded[0]." ".$r_exploded[1];
-            $possible_colors_3[] = $colors;
-        }
+$stop = false;
+$count = count_child('shiny gold');
+
+function count_child($bagColor) {
+    GLOBAL $bags;
+
+    if (!isset($bags[$bagColor]))
+        return 0;
+
+    $bagContent = $bags[$bagColor];
+
+    $count = 0;
+    foreach ($bagContent as $bagDetails) {
+        $count += $bagDetails[0];
+        $count += $bagDetails[0] * count_child($bagDetails[1]);
     }
+
+    return $count;
+
 }
 
-$possible_colors_4 = [];
-foreach ($possible_colors_3 as $possibleColor) {
-    foreach ($rows as $row) {
-        if (strpos($row, $possibleColor) !== false && strpos($row, $possibleColor) !== 0) {
-            $r_exploded = explode(" ", $row);
-            $colors = $r_exploded[0]." ".$r_exploded[1];
-            $possible_colors_4[] = $colors;
-        }
-    }
-}
+echo "\n";
 
-$possible_colors_5 = [];
-foreach ($possible_colors_4 as $possibleColor) {
-    foreach ($rows as $row) {
-        if (strpos($row, $possibleColor) !== false && strpos($row, $possibleColor) !== 0) {
-            $r_exploded = explode(" ", $row);
-            $colors = $r_exploded[0]." ".$r_exploded[1];
-            $possible_colors_5[] = $colors;
-        }
-    }
-}
-
-$possible_colors_6 = [];
-foreach ($possible_colors_5 as $possibleColor) {
-    foreach ($rows as $row) {
-        if (strpos($row, $possibleColor) !== false && strpos($row, $possibleColor) !== 0) {
-            $r_exploded = explode(" ", $row);
-            $colors = $r_exploded[0]." ".$r_exploded[1];
-            $possible_colors_6[] = $colors;
-        }
-    }
-}
-
-$possible_colors_7 = [];
-foreach ($possible_colors_6 as $possibleColor) {
-    foreach ($rows as $row) {
-        if (strpos($row, $possibleColor) !== false && strpos($row, $possibleColor) !== 0) {
-            $r_exploded = explode(" ", $row);
-            $colors = $r_exploded[0]." ".$r_exploded[1];
-            $possible_colors_7[] = $colors;
-        }
-    }
-}
-
-$possible_colors_8 = [];
-foreach ($possible_colors_7 as $possibleColor) {
-    foreach ($rows as $row) {
-        if (strpos($row, $possibleColor) !== false && strpos($row, $possibleColor) !== 0) {
-            $r_exploded = explode(" ", $row);
-            $colors = $r_exploded[0]." ".$r_exploded[1];
-            $possible_colors_8[] = $colors;
-        }
-    }
-}
-
-$possible_colors_9 = [];
-foreach ($possible_colors_8 as $possibleColor) {
-    foreach ($rows as $row) {
-        if (strpos($row, $possibleColor) !== false && strpos($row, $possibleColor) !== 0) {
-            $r_exploded = explode(" ", $row);
-            $colors = $r_exploded[0]." ".$r_exploded[1];
-            $possible_colors_9[] = $colors;
-        }
-    }
-}
-
-
-$merge = array_merge($possible_colors_2, $possible_colors, $possible_colors_3, $possible_colors_4, $possible_colors_5, $possible_colors_6, $possible_colors_7, $possible_colors_8, $possible_colors_9);
-$unique = array_unique($merge);
-echo count($unique);
-
-//
-//
-//// $possible_colors ora contiene solo i colori che possono contenere all'interno una shiny gold
-//// reitero
-//
-//$count = 0;
-//foreach ($rows as $row) {
-//    // smonto la riga, tolgo il primo colore e la rimonto
-//    $r_exploded = explode(" ", $row);
-//    array_shift($r_exploded);
-//    array_shift($r_exploded);
-//    $row_imploded = implode(" ", $r_exploded);
-//
-//    // per ogni possibile color, verifico che sia presente nella riga, se si può contenere una shiny gold
-//    foreach ($possible_colors as $possibleColor) {
-//        if (strpos($row_imploded, $possibleColor) !== false) {
-//            $count += 1;
-//            break;
-//        }
-//    }
-//}
-
-//echo $count;
+echo $count;
