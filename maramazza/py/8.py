@@ -1,16 +1,12 @@
 import pprint
-
 pc = 0
 acc = 0
-
 
 def replaceInstr(mem, n):
     count = 0
     for line in mem:
-        #if 'nop' in line:
         if 'jmp' in line:
             if count == n:
-                #line.replace('nop','jmp')
                 line.replace('jmp', 'nop')
             count += 1
     return mem
@@ -20,8 +16,7 @@ if __name__ == "__main__":
     data = []
 
     with open('./../data/8.txt', 'r') as f:
-        data = f.read()[:-1].split('\n')  # [:-1] to cut off the last \n
-
+        data = f.read()[:-1].split('\n')  
     alreadyExecuted = [0] * len(data)
 
     # part 1
@@ -42,7 +37,7 @@ if __name__ == "__main__":
             elif instr == 'jmp':
                 pc += val
 
-    print(f'Part1 {acc}')
+    print(f'Res Part1: {acc}')
 
     # part 2
     for i in range(len(data)):
@@ -81,4 +76,4 @@ if __name__ == "__main__":
         except:
             break
 
-    print(f'Part2 {acc}')
+    print(f'Res Part2: {acc}')
