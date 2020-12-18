@@ -25,13 +25,11 @@ enum Ast {
     Mul(Box<Ast>, Box<Ast>),
 }
 
-macro_rules! lexer_flush {
-    ($cur:expr, $res:expr) => {
-        if !$cur.is_empty() {
-            $res.push_back(Token::Num($cur.parse::<i64>().unwrap()));
-            $cur.clear();
-        }
-    };
+fn lexer_flush(cur: &mut String, res: &mut VecDeque<Token>) {
+    if !cur.is_empty() {
+        res.push_back(Token::Num(cur.parse::<i64>().unwrap()));
+        cur.clear();
+    }
 }
 
 fn lexer(expr: &str) -> VecDeque<Token> {
@@ -42,27 +40,27 @@ fn lexer(expr: &str) -> VecDeque<Token> {
         match c {
             c if c.is_numeric() => cur.push(c),
             '+' => {
-                lexer_flush!(cur, res);
+                lexer_flush(&mut cur, &mut res);
                 res.push_back(Token::Add);
             }
             '*' => {
-                lexer_flush!(cur, res);
+                lexer_flush(&mut cur, &mut res);
                 res.push_back(Token::Mul);
             }
             '(' => {
-                lexer_flush!(cur, res);
+                lexer_flush(&mut cur, &mut res);
                 res.push_back(Token::SubExpr);
             }
             ')' => {
-                lexer_flush!(cur, res);
+                lexer_flush(&mut cur, &mut res);
                 res.push_back(Token::SubExprClose);
             }
-            ' ' => lexer_flush!(cur, res),
+            ' ' => lexer_flush(&mut cur, &mut res),
             _ => panic!("Unexpected char: '{}'", c),
         }
     }
 
-    lexer_flush!(cur, res);
+    lexer_flush(&mut cur, &mut res);
 
     res
 }

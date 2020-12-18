@@ -15,8 +15,8 @@ enum Token {
     Num(i64),
     Add,
     Mul,
-    ParOpen,
-    ParClose,
+    SubExpr,
+    SubExprClose,
 }
 
 enum Ast {
@@ -25,13 +25,11 @@ enum Ast {
     Mul(Box<Ast>, Box<Ast>),
 }
 
-macro_rules! lexer_flush {
-    ($cur:expr, $res:expr) => {
-        if !$cur.is_empty() {
-            $res.push_back(Token::Num($cur.parse::<i64>().unwrap()));
-            $cur.clear();
-        }
-    };
+fn lexer_flush(cur: &mut String, res: &mut VecDeque<Token>) {
+    if !cur.is_empty() {
+        res.push_back(Token::Num(cur.parse::<i64>().unwrap()));
+        cur.clear();
+    }
 }
 
 fn lexer(expr: &str) -> VecDeque<Token> {
@@ -42,27 +40,27 @@ fn lexer(expr: &str) -> VecDeque<Token> {
         match c {
             c if c.is_numeric() => cur.push(c),
             '+' => {
-                lexer_flush!(cur, res);
+                lexer_flush(&mut cur, &mut res);
                 res.push_back(Token::Add);
             }
             '*' => {
-                lexer_flush!(cur, res);
+                lexer_flush(&mut cur, &mut res);
                 res.push_back(Token::Mul);
             }
             '(' => {
-                lexer_flush!(cur, res);
-                res.push_back(Token::ParOpen);
+                lexer_flush(&mut cur, &mut res);
+                res.push_back(Token::SubExpr);
             }
             ')' => {
-                lexer_flush!(cur, res);
-                res.push_back(Token::ParClose);
+                lexer_flush(&mut cur, &mut res);
+                res.push_back(Token::SubExprClose);
             }
-            ' ' => lexer_flush!(cur, res),
+            ' ' => lexer_flush(&mut cur, &mut res),
             _ => panic!("Unexpected char: '{}'", c),
         }
     }
 
-    lexer_flush!(cur, res);
+    lexer_flush(&mut cur, &mut res);
 
     res
 }
@@ -70,7 +68,7 @@ fn lexer(expr: &str) -> VecDeque<Token> {
 fn parse_right_hand(mut tokens: &mut VecDeque<Token>) -> Box<Ast> {
     match tokens.pop_front() {
         Some(Token::Num(n)) => Box::new(Ast::Num(n)),
-        Some(Token::ParOpen) => {
+        Some(Token::SubExpr) => {
             let sub_expr = parse_expr(&mut tokens);
             parse_expect_close(&mut tokens);
             sub_expr
@@ -97,7 +95,7 @@ fn parse_is_op(op: Option<&Token>) -> bool {
 
 fn parse_expect_close(tokens: &mut VecDeque<Token>) {
     match tokens.pop_front() {
-        Some(Token::ParClose) => (),
+        Some(Token::SubExprClose) => (),
         Some(t) => panic!("unexpected token {:?} - ')' expected", t),
         None => panic!("unexpected termination - ')' expected"),
     }
@@ -116,7 +114,7 @@ fn parse_expr(mut tokens: &mut VecDeque<Token>) -> Box<Ast> {
 
             left
         },
-        Some(Token::ParOpen) => {
+        Some(Token::SubExpr) => {
             let parsed = parse_expr(&mut tokens);
             parse_expect_close(&mut tokens);
             parsed
