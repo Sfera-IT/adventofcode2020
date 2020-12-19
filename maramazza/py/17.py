@@ -1,29 +1,25 @@
 import copy
 
 
-def energy_cycle(grid, new_grid):
-    pass
+def solvePart1(puzzleInput, passes):
+    activeCubes = set()
 
-
-def solve_part_1(puzzle_input, passes):
-    active_cubes = set()
-
-    for x in range(len(puzzle_input)):
-        for y in range(len(puzzle_input[0])):
-            if puzzle_input[x][y] == '#':
-                active_cubes.add((0, x, y))
+    for x in range(len(puzzleInput)):
+        for y in range(len(puzzleInput[0])):
+            if puzzleInput[x][y] == '#':
+                activeCubes.add((0, x, y))
 
     for _ in range(passes):
-        min_dimension = min(min(dimension for dimension in cube)
-                            for cube in active_cubes)
-        max_dimension = max(max(dimension for dimension in cube)
-                            for cube in active_cubes)
+        minDimension = min(min(dimension for dimension in cube)
+                           for cube in activeCubes)
+        maxDimension = max(max(dimension for dimension in cube)
+                           for cube in activeCubes)
 
-        active_cubes_new = set()
+        activeCubesNew = set()
 
-        for z in range(min_dimension - 1, max_dimension + 2):
-            for x in range(min_dimension - 1, max_dimension + 2):
-                for y in range(min_dimension - 1, max_dimension + 2):
+        for z in range(minDimension - 1, maxDimension + 2):
+            for x in range(minDimension - 1, maxDimension + 2):
+                for y in range(minDimension - 1, maxDimension + 2):
                     count = 0
 
                     for zdiff in range(-1, 2):
@@ -32,36 +28,36 @@ def solve_part_1(puzzle_input, passes):
                                 if zdiff == 0 and xdiff == 0 and ydiff == 0:
                                     continue
 
-                                if (z + zdiff, x + xdiff, y + ydiff) in active_cubes:
+                                if (z + zdiff, x + xdiff, y + ydiff) in activeCubes:
                                     count += 1
 
-                    if count == 3 or (count == 2 and (z, x, y) in active_cubes):
-                        active_cubes_new.add((z, x, y))
+                    if count == 3 or (count == 2 and (z, x, y) in activeCubes):
+                        activeCubesNew.add((z, x, y))
 
-        active_cubes = active_cubes_new
+        activeCubes = activeCubesNew
 
-    return len(active_cubes)
+    return len(activeCubes)
 
 
-def solve_part_2(puzzle_input, passes):
-    active_cubes = set()
+def solvePart2(puzzleInput, passes):
+    activeCubes = set()
 
-    for x in range(len(puzzle_input)):
-        for y in range(len(puzzle_input[0])):
-            if puzzle_input[x][y] == '#':
-                active_cubes.add((0, 0, x, y))
+    for x in range(len(puzzleInput)):
+        for y in range(len(puzzleInput[0])):
+            if puzzleInput[x][y] == '#':
+                activeCubes.add((0, 0, x, y))
 
     for _ in range(passes):
-        min_dimension = min(min(dimension for dimension in cube)
-                            for cube in active_cubes)
-        max_dimension = max(max(dimension for dimension in cube)
-                            for cube in active_cubes)
+        minDimension = min(min(dimension for dimension in cube)
+                           for cube in activeCubes)
+        maxDimension = max(max(dimension for dimension in cube)
+                           for cube in activeCubes)
 
-        active_cubes_new = set()
-        for w in range(min_dimension-1, max_dimension + 2):
-            for z in range(min_dimension - 1, max_dimension + 2):
-                for x in range(min_dimension - 1, max_dimension + 2):
-                    for y in range(min_dimension - 1, max_dimension + 2):
+        activeCubesNew = set()
+        for w in range(minDimension-1, maxDimension + 2):
+            for z in range(minDimension - 1, maxDimension + 2):
+                for x in range(minDimension - 1, maxDimension + 2):
+                    for y in range(minDimension - 1, maxDimension + 2):
                         count = 0
 
                         for wdiff in range(-1, 2):
@@ -71,30 +67,30 @@ def solve_part_2(puzzle_input, passes):
                                         if wdiff == 0 and zdiff == 0 and xdiff == 0 and ydiff == 0:
                                             continue
 
-                                        if (w + wdiff, z + zdiff, x + xdiff, y + ydiff) in active_cubes:
+                                        if (w + wdiff, z + zdiff, x + xdiff, y + ydiff) in activeCubes:
                                             count += 1
 
-                        if count == 3 or (count == 2 and (w, z, x, y) in active_cubes):
-                            active_cubes_new.add((w, z, x, y))
+                        if count == 3 or (count == 2 and (w, z, x, y) in activeCubes):
+                            activeCubesNew.add((w, z, x, y))
 
-        active_cubes = active_cubes_new
+        activeCubes = activeCubesNew
 
-    return len(active_cubes)
+    return len(activeCubes)
 
 
-def get_puzzle_input():
-    puzzle_input = []
-    with open("./../data/17.txt") as input_txt:
-        for line in input_txt:
-            puzzle_input.append(line.strip())
-    return puzzle_input
+def getPuzzleInput():
+    puzzleInput = []
+    with open("./../data/17.txt") as inputTxt:
+        for line in inputTxt:
+            puzzleInput.append(line.strip())
+    return puzzleInput
 
 
 if __name__ == "__main__":
-    puzzle_input = get_puzzle_input()
+    puzzleInput = getPuzzleInput()
 
-    answer_1 = solve_part_1(puzzle_input, 6)
-    print(f"Res Part 1: {answer_1}")
+    answer1 = solvePart1(puzzleInput, 6)
+    print(f"Res Part 1: {answer1}")
 
-    answer_2 = solve_part_2(puzzle_input, 6)
-    print(f"Part 2: {answer_2}")
+    answer2 = solvePart2(puzzleInput, 6)
+    print(f"Part 2: {answer2}")
