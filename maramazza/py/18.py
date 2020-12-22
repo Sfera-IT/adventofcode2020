@@ -1,44 +1,105 @@
-import re
+from collections import deque
+from functools import reduce
 
 
-class WiredOperator(int):
-    def __add__(self, b):
-        return WiredOperator(int(self) + b)
+def evaluate_simple(line):
+    while '+' in line:
+        add_index = -1
 
-    def __mul__(self, b):
-        return WiredOperator(int(self) + b)
+        for index, char in enumerate(line):
+            if char == '+':
+                add_index = index
+                break
 
-    def __sub__(self, b):
-        return WiredOperator(int(self) * b)
+        line = line[:add_index - 1] + [line[add_index - 1] +
+                                       line[add_index + 1]] + line[add_index + 2:]
+
+    return reduce(lambda a, b: a * b, [num for num in line if isinstance(num, int)])
 
 
-class Day18:
-    def __init__(self, content):
-        self.lines = content.split("\n")
+def evaluate_line(line):
+    list_line = list(line)
 
-    def part1(self):
-        ans = 0
-        for e in self.lines:
-            e = re.sub(r"(\d)+", r"WiredOperator(\1)", e)
-            e = e.replace("*", "-")
-            v = eval(e, {}, {"WiredOperator": WiredOperator})
-            ans += v
-        return ans
+    for x in range(len(list_line)):
+        if list_line[x].isdigit():
+            list_line[x] = int(list_line[x])
 
-    def part2(self):
-        ans = 0
-        for e in self.lines:
-            e = re.sub(r"(\d+)", r"WiredOperator(\1)", e)
-            e = e.replace("*", "-")
-            e = e.replace("+", "*")
-            v = eval(e, {}, {"WiredOperator": WiredOperator})
-            ans += v
-        return ans
+    while True:
+        parentheses = []
+        stack = []
 
-def solve():
-    content = open("./../data/18.txt").read()
-    day18 = Day18(content)
-    print(day18.part1())
-    print(day18.part2())
+        for index, char in enumerate(list_line):
+            if char == '(':
+                stack.append(index)
+            elif char == ')':
+                parentheses.append((stack.pop(), index))
 
-solve()
+        open_index = -1
+        close_index = -1
+
+        for open, close in parentheses:
+            if not any(paren[0] > open and paren[1] < close for paren in parentheses):
+                open_index = open
+                close_index = close
+                break
+
+        if open_index == -1:
+            break
+
+        list_line = list_line[:open_index] + [evaluate_simple(
+            list_line[open_index + 1:close_index])] + list_line[close_index + 1:]
+
+    return evaluate_simple(list_line)
+
+
+def solvePart1(puzzle_input):
+    result = 0
+    for line in puzzle_input:
+        num = 0
+        add = True
+        stack = deque()
+        for char in line:
+            if char == "(":
+                stack.append((num, add))
+                add = True
+                num = 0
+            elif char == ")":
+                (number, is_add) = stack.pop()
+                if is_add:
+                    num += number
+                else:
+                    num *= number
+            elif char == "+":
+                add = True
+            elif char == "*":
+                add = False
+            else:
+                number = int(char)
+                if add:
+                    num += number
+                else:
+                    num *= number
+        result += num
+    return result
+
+
+def solvePart2(puzzle_input):
+    return sum(map(evaluate_line, puzzle_input))
+
+
+def getPuzzleInput():
+    puzzle_input = []
+    with open("./../data/18.txt") as input_txt:
+        for line in input_txt:
+            puzzle_input.append(line.strip().replace(" ", ""))
+    return puzzle_input
+
+
+if __name__ == "__main__":
+    puzzleInput = getPuzzleInput()
+
+    answer1 = solvePart1(puzzleInput)
+    print(f"Res Part 1: {answer1}")
+
+    answer2 = solvePart1(puzzleInput)
+    print(f"Res Part 2: {answer2}")
