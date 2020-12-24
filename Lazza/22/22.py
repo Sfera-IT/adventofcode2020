@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-import numpy
-
 contents = open("input", "r").read()
 blocks = [
     l for l in contents.split('\n\n')
